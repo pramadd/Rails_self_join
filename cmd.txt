@@ -1,0 +1,77 @@
+# creating the models
+rails g model User first_name:string last_name:string
+rails g model Friendship user_id:integer friend_id:integer
+
+# model structure
+class User < ActiveRecord::Base
+  has_many :friendships, :foreign_key => "user_id", :class_name => "Friendship"
+  has_many :friends, :through => :friendships  
+end
+
+class Friendship < ActiveRecord::Base
+  belongs_to :user, :foreign_key => "user_id", :class_name => "User"
+  belongs_to :friend, :foreign_key => "friend_id", :class_name => "User"
+end
+-----------------
+#creating users
+
+
+
+User.create(first_name: "neethu",last_name: "reddy")
+User.create(first_name: "chintu",last_name: "reddy")
+User.create(first_name: "buntu",last_name: "reddy")
+User.create(first_name: "bunty",last_name: "reddy")
+
+User.all
+  User Load (2.1ms)  SELECT "users".* FROM "users"
++----+------------+-----------+-------------------------+-------------------------+
+| id | first_name | last_name | created_at              | updated_at              |
++----+------------+-----------+-------------------------+-------------------------+
+| 1  | neethu     | reddy     | 2017-12-05 21:07:35 UTC | 2017-12-05 21:07:35 UTC |
+| 2  | chintu     | reddy     | 2017-12-05 21:07:51 UTC | 2017-12-05 21:07:51 UTC |
+| 3  | buntu      | reddy     | 2017-12-05 21:08:00 UTC | 2017-12-05 21:08:00 UTC |
+| 4  | bunty      | reddy     | 2017-12-05 21:08:07 UTC | 2017-12-05 21:08:07 UTC |
++----+------------+-----------+-------------------------+-------------------------+
+4 rows in set
+--------------------
+
+#creating friendships
+
+
+Friendship.create(user: User.first, friend: User.last)
+Friendship.create(user: User.first, friend: User.second)
+Friendship.create(user: User.second, friend: User.last)
+Friendship.create(user: User.second, friend: User.third)
+Friendship.create(user: User.second, friend: User.first)
+
+
+Friendship.all
+  Friendship Load (2.3ms)  SELECT "friendships".* FROM "friendships"
++----+---------+-----------+-------------------------+-------------------------+
+| id | user_id | friend_id | created_at              | updated_at              |
++----+---------+-----------+-------------------------+-------------------------+
+| 1  | 1       | 4         | 2017-12-05 21:10:30 UTC | 2017-12-05 21:10:30 UTC |
+| 2  | 1       | 2         | 2017-12-05 21:10:55 UTC | 2017-12-05 21:10:55 UTC |
+| 3  | 2       | 4         | 2017-12-05 21:11:08 UTC | 2017-12-05 21:11:08 UTC |
+| 4  | 2       | 3         | 2017-12-05 21:14:02 UTC | 2017-12-05 21:14:02 UTC |
+| 5  | 2       | 1         | 2017-12-05 21:14:08 UTC | 2017-12-05 21:14:08 UTC |
++----+---------+-----------+-------------------------+-------------------------+
+5 rows in set
+--------------
+
+## User.first should retrieve the first user information
+## User.first.friends should display all the friend information of the first user (this should include the first name and last name of all the friends of User.first).
+
+User.first.friends
+  User Load (2.0ms)  SELECT  "users".* FROM "users"  ORDER BY "users"."id" ASC LIMIT 1
+  User Load (2.8ms)  SELECT "users".* FROM "users" INNER JOIN "friendships" ON "users"."id" = "friendships"."friend_id" WHERE "friendships"."user_id" = ?  [["user_id", 1]]
++----+------------+-----------+-------------------------+-------------------------+
+| id | first_name | last_name | created_at              | updated_at              |
++----+------------+-----------+-------------------------+-------------------------+
+| 4  | bunty      | reddy     | 2017-12-05 21:08:07 UTC | 2017-12-05 21:08:07 UTC |
+| 2  | chintu     | reddy     | 2017-12-05 21:07:51 UTC | 2017-12-05 21:07:51 UTC |
++----+------------+-----------+-------------------------+-------------------------+
+2 rows in set
+
+
+-------
